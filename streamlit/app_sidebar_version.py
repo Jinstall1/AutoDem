@@ -116,16 +116,33 @@ if selected == "Home":
 
     with col1:
         st.markdown("### Project Setup")
-        # Create New Project
+        # Create New Project (with input form)
+        if "show_project_form" not in st.session_state:
+            st.session_state.show_project_form = False
+
         if st.button("➕ Create New Project"):
-            for k in [
-                "project_name","parameters","reaction_data",
-                "model_settings","suggestions","project_notes",
-                "change_log","project_loaded"
-            ]:
-                st.session_state.pop(k, None)
-            st.success("Starting a new project…")
-            st.rerun()
+            st.session_state.show_project_form = True
+
+        if st.session_state.show_project_form:
+            with st.form("new_project_form"):
+                st.subheader("Create New Project")
+                project_name = st.text_input("Project Name")
+                project_objective = st.text_area("Project Objective")
+                project_description = st.text_area("Project Description")
+                submitted = st.form_submit_button("Create Project")
+                if submitted:
+                    for k in [
+                        "parameters", "reaction_data",
+                        "model_settings", "suggestions",
+                        "project_notes", "change_log", "project_loaded"
+                    ]:
+                        st.session_state.pop(k, None)
+                    st.session_state.project_name = project_name
+                    st.session_state.project_objective = project_objective
+                    st.session_state.project_description = project_description
+                    st.session_state.project_created = True
+                    st.session_state.show_project_form = False
+                    st.success(f"Project '{project_name}' created successfully! You can now continue in the Configuration tab.")
 
         st.markdown("---")
 
@@ -146,7 +163,7 @@ if selected == "Home":
 
     with col2:
         st.markdown("### Project Details")
-        if st.session_state.get("project_loaded", False):
+        if st.session_state.get("project_loaded", False) or st.session_state.get("project_created", False):
             st.markdown(f"**Current Project:** {st.session_state.project_name}")
 
             # Project Notes
